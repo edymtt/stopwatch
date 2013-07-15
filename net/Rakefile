@@ -1,0 +1,20 @@
+require 'rake/clean'
+
+CLOBBER.include('TimeEnforcer.dll')
+
+task :default => ["test"]
+
+SRC = FileList['*.cs'].gsub(%r|/|, "\\")
+
+file "TimeEnforcer.dll" => SRC do
+  sh "cp package/NUnit/lib/nunit.framework.dll ."
+  sh "mcs /target:library /out:TimeEnforcer.dll /r:nunit.framework.dll #{SRC}"
+end
+
+task "test" => ["nuget", "TimeEnforcer.dll"] do
+  sh "mono --runtime=v4.0 package/NUnit.Runners/tools/nunit-console.exe TimeEnforcer.dll"
+end
+
+task "nuget" do
+  sh "mono --runtime=v4.0 ~/bin/Nuget.exe install packages.config -o package -ExcludeVersion"
+end
