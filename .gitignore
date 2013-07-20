@@ -109,4 +109,6 @@ Backup*/
 UpgradeLog*.XML
 
 net/TimeEnforcer.dll
+net/TimeEnforcer.exe
 net/nunit.framework.dll
+net/nunitlite.dll

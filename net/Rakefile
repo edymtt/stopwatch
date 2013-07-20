@@ -1,18 +1,20 @@
 require 'rake/clean'
 
-CLOBBER.include('TimeEnforcer.dll')
+EXE='TimeEnforcer.exe'
+
+CLOBBER.include(EXE)
 
 task :default => ["test"]
 
 SRC = FileList['*.cs'].gsub(%r|/|, "\\")
 
-file "TimeEnforcer.dll" => SRC do
-  sh "cp package/NUnit/lib/nunit.framework.dll ."
-  sh "mcs /target:library /out:TimeEnforcer.dll /r:nunit.framework.dll #{SRC}"
+file EXE => SRC do
+  sh "cp package/NUnitLite/lib/net45/nunitlite.dll ."
+  sh "mcs /target:exe /out:#{EXE} /r:nunitlite.dll #{SRC}"
 end
 
-task "test" => ["nuget", "TimeEnforcer.dll"] do
-  sh "mono --runtime=v4.0 package/NUnit.Runners/tools/nunit-console.exe TimeEnforcer.dll"
+task "test" => ["nuget", EXE] do
+  sh "mono --runtime=v4.0 #{EXE}"
 end
 
 task "nuget" do
