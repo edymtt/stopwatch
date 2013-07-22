@@ -1,6 +1,20 @@
 require 'rake/clean'
+require_relative 'download'
+require 'rbconfig'
 
 EXE='TimeEnforcer.exe'
+
+def is_windows?
+	return (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
+end
+
+if is_windows?
+DOTNETRUNTIME=''
+NUGET='c:\bin\nuget.exe'
+else
+	DOTNETRUNTIME='mono --runtime=v4.0'
+end
+CSC='"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"'
 
 CLOBBER.include(EXE)
 
@@ -9,14 +23,15 @@ task :default => ["test"]
 SRC = FileList['*.cs'].gsub(%r|/|, "\\")
 
 file EXE => SRC do
-  sh "cp package/NUnitLite/lib/net45/nunitlite.dll ."
-  sh "mcs /target:exe /out:#{EXE} /r:nunitlite.dll #{SRC}"
+  sh "copy package\\NUnitLite\\lib\\net45\\nunitlite.dll ."
+  sh "#{CSC} /target:exe /out:#{EXE} /r:nunitlite.dll #{SRC}"
 end
 
 task "test" => ["nuget", EXE] do
-  sh "mono --runtime=v4.0 #{EXE}"
+  sh "#{DOTNETRUNTIME} #{EXE}"
 end
 
 task "nuget" do
-  sh "mono --runtime=v4.0 ~/bin/Nuget.exe install packages.config -o package -ExcludeVersion"
+  download_with_progress 'http://nuget.org:80/nuget.exe'
+  sh "set EnableNuGetPackageRestore=true & #{DOTNETRUNTIME} #{NUGET} install packages.config -o package -ExcludeVersion"
 end

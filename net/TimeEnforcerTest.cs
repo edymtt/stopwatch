@@ -8,17 +8,20 @@ namespace edymtt
 public class MinimumTimeEnforcerTest
 {
 	[Test()]
-	public void TestTimespanZeroWithSuccess()
+	public void TestTimespanWithSuccess()
 	{
-		TimeSpan minimumTime = TimeSpan.Zero;
+		TimeSpan minimumTime = TimeSpan.FromSeconds(10);
 
-		Assert.IsTrue(TimeSpan.FromSeconds(2) <= MeasureElapsed(() =>
+		var elapsed= MeasureElapsed(() =>
 		{
 			using (var enforcer = new MinimumTimeEnforcer(minimumTime)) {
 				System.Threading.Thread.Sleep(TimeSpan.FromSeconds(2));
 				enforcer.Complete(true);
 			}
-		}), "Elapsed less that 2 seconds");
+		});
+
+		Assert.IsTrue(TimeSpan.FromSeconds(2) <= elapsed, "Elapsed less that 2 seconds");
+		Assert.IsTrue(TimeSpan.FromSeconds(10) > elapsed, "Elapsed less that 10 seconds");
 	}
 
 
